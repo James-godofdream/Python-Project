@@ -1,0 +1,426 @@
+    jupyter notebook 的高级运用
+          1. 通过使用“标记”功能来进行 notebook的注释
+          2.“标记”行通过添加#来区分注释大小，#号越多字体越小
+          3.“标记”前添加+、-、_等可以生成无序列表
+          4.“标记”前添加数字加点加空格，可生成有序列表
+          5.“标记”前后添加三个#或者_可生成斜体，一个、两个则加粗
+          6.“标记”前添加$插入数学公式，$$则插入数学方块
+
+
+    ndarray 属性
+          1.ndim   返回int  ， 表示数组维数
+          2.shape  返回tuple ,  表示数组的大小（行，列）
+          3.size     返回int ,   表示数组的元素总数，行X列
+          4.dtype  返回data-type ， 描述数组中元素的类型
+          5.itemsize  返回int ， 表示数组的没个元素的大小（以字节为单位）
+    
+      数组创建  numpy.array(object,dytpe = None,copy,copy=True,order='k',subok=False,ndim=0)
+          1.object  接收array , 表示想要创建的数组
+          2.dtype   接收data-type , 表示数组所需的数据类型。如果未给定，则选择保存对象所需的最小类型
+          3.ndim    接收 int ， 指定生成数组应该具有的最小维数
+          4. 可以使用 arange(10） 、linspace(0,10,10) 、logsapce(0,10,10) 、zeros(2) 、ones(2)  创建一维数组
+          5. 可以使用 zeros((2,3)) 、eye(3) 、diag([1,3]) 、 ones((2,3))函数 创建二维数组
+          6.创建数组时默认数据类型为浮点型
+     
+     生成随机数
+         1. 无约束生成随机数 np.random.random(size) 0-1  (size = (2,3))二维
+         2.  服从均匀分布的随机数 np.random.rand(2,3,2）表示三个维度
+         3. 服从正态分布的随机数 np.random.randn(2,3,2) 同上
+         4. 给定上下范围的随机数 np.random.randint(low,high=None , size = None,dytpe =int)
+         
+    变换数组大小       
+         1.ravel 函数可以展平数组
+         2.flatten 函数可以横纵（order = 'F'）展平数组
+         3.hstack 函数实现数组横向组合 np.hstack((arr1,arr2))
+         4.vstack 函数              纵向
+         5.concatenate 函数  横向组合 np.concatenate((arr1,arr2),axis=1)
+         6.concatenate 函数  纵向组合 np.concatenate((arr1,arr2),axis=0)
+         7.hsplit                     横向切割 np.hsplit(arr1,2)
+         8.vsplit                     纵向
+         9.split            横向 np.split(arr,2,axis = 1)
+         10.split          纵向                           = 0
+ 
+      创建NumPy矩阵
+         1.mat 函数    np.mat("1 2 3;4 5 6; 7 8 9")
+         2.matrix 函数 np.matrix([[123],[456],[789]])
+         3.bmat 函数 用于合成两个矩阵  np.bmat("arr1 arr2;arr3 arr2")
+     
+      矩阵的运算
+         1.数乘 matrix * 3
+         2.点乘 matrix * matrix
+         3.对应元素相乘     np.multiply(matr1,matri2)
+         4.矩阵属性  
+                             T      转置
+                             H     共轭转置
+                             I       逆矩阵
+                             A      返回自身数据的二维数组的一个视图
+         5.ufunc函数为全称通用函数
+           np.any 表示 or 
+           np.and 表示 and  结果返回布尔值
+ 
+     读写文件
+         1.二进制格式保存数据 np.save("../.../...npy",arr)  np.savez("../.../...npz",arr1,arr2)
+         2.                读取        np.load("../.../...")  可通过索引查看多个
+         3.存储时可以省略拓展名，读取时不能
+         4.savetxt 函数可将数组写到某种分隔符隔开的文本文件中 
+           np.savetxt("../.../...txt",arr,fmt = "%d",delimiter = ",")
+         5.loadtxt 函数执行的是把文件加载到一个二维数组中
+            np.loadtxt("../...//...txt",delimiter=",")
+         6.genfromtxt 函数面向的是结构化数组和缺失数据
+           np.genfromtxt("../.../...txt",delimiter=",")
+ 
+  直接排序
+         1.sort 函数
+         2. 通过axis 的值 决定排序方向 axis = 1 为横向排序
+
+  间接排序 
+         1. argsort 函数返回值为从新排序之的下标      arr.sort()
+         2.lexsort 函数的返回值时按照最后一个传入数据排序的 np.lexsort((a,b,c))
+ 
+  去重与重复数据
+         1. 通过unique 函数可以找出数组中的唯一值并返回已排序的结果
+         2.tile 函数主要有两个参数 ， 参数“A”指定重复的数组，参数“reps”指定重复的次数
+         3.repeat 函数主要有三个参数 ， 参数 “a”是需要重复的数组元素，参数“repeats ”是重复次数，参数“axis”指定沿着哪个轴重复，
+           axis = 0 表示按照元素行重复， axis = 1 表示按照元素列重复
+         4.2、3区别为 2 是对数组重复 ， 3 是对元素重复操作
+
+  绘图 matplotlib 库
+         1.散点图  plt.scatter(x,y,s = None, c = None,marker = None,alpha = None , **kwargs)
+         2.折线图  plt.plot(x,y,color,linestyle,marker,alpha= None)
+         3.直方图  plt.bar(left , height , width = 0.8 , bottom = None , hold = None , data = None )
+         4.饼图     plt.pie(x,explode = None , labels = None , colors = None , autopoct = None , pctdistancce = 0.6 , shadow = False , labeldistance = 1.1 , startangle = None , radius  = None,..)
+         5.箱线图  plt.boxplot(x,notch = None , sym = None,vert = None,whis = None, positions = None, widths = None , patch_artist = None, meanline = None , labels = None,...) 
+
+  
+   读写数据库 
+          1.数据库数据读取
+             在使用Python的DQLAlchemy时，MySQL和Oracle数据库连接字符串的格式如下
+             数据库产品名+连接工具名：//用户名:密码@数据库IP地址:数据库端口号/数据库名称？charset = 数据库数据编码
+          例：import pandas as pd
+                form sqlalchemy import create+engine 
+                engin = create_engine('mysql+pymysql://root:123456@127.0.0.1:3306/test?charset=utf8')
+            2.read_sql_table(table_name,con) 、read_sql_query(sql,con)、read_sql(sql,con)
+            3.数据库数据存储 只有一个DataFrame.to_sql(name,con,if_exists = 'fail')
+
+
+    文本文件(字符分隔文件）
+            1.read_table,read_csv 函数来读取文本文件(注意分隔符号和编码）
+            2.文本文件存储 DataFrame.to_csv(filepath)
+    读写Excel文件读取
+           1.pandas 提供了 read_excel（io,sheetname = 0,header = 0）函数来读取“xls”、"xlsx"两种文件
+           2.DataFrame.to_excel方法来存储Excel文件
+    查改增删DataFrame数据 
+           1.loc 查看切片是前闭后闭区间， iloc 则是前闭后开
+           2.删除某列或某行数据
+             drop(labels,axis= 0，inplace = false)  axis = 0 为删除行， axis = 1为删除列
+             del data[‘’]
+     描述分析DataFrame 数据
+           1.数值型特征的描述性统计 pandas 提供 describe方法来进行统计
+           2.类别性特征的描述性统计 
+              value_counts方法 频数统计    
+             可以使用astype方法将目标特征的数据类型转换为category类别，从而进行describe查看
+             
+     转换字符串时间为标准时间
+           1.pandas时间相关的类 
+             Timestamp 、         pandas 的 to_datetime 可将时间转换为Timestamp （该类时间有限制）
+             可以将数据单独提取出来转换为DatetimeIndex 或者 PeriodIndex ,转换为PeriodIndex是需注意用freq参数指定时间间隔
+           2.Timestamp类常用属性
+             可以查看时间的年月日，星期、年中日等 ，可以轻松的实现在某个时间上的加减
+
+    使用groupby方法拆分数据
+    使用agg方法聚合数据
+            1.如detail[‘1’，‘2’].agg([np.sum,np.mean]))
+    使用apply方法聚合数据
+            1. apply方法只能作用于DataFame、Series整个
+     使用transform方法聚合数据
+            1.能对DataFrame整个进行操作，只有一个参数func
+            2.能对DataFrame 分组后进行操作，可离差标准化
+
+     使用povit_table函数创建透视表
+            1.pandas.pivot_table(data,values = None ,index = None,columns = None,aggfunc = 'mean')
+      使用crosstab函数创建交叉表
+            1.pandas.crosstab(index,columns,values = None,...)
+
+     数据合并
+    堆叠合并数据
+            1.横向表堆叠       pandas.concat(objs,axis = 0，join = 'outer') 
+                                      axis = 1 时 行对齐  join = inner 为内连接 （交集）join = outer 为外连接（并集）
+                                      axis = 0     列对其  不足处用NaN补齐
+            2.主键合并     merge 函数  左连接、右连接、内连接、外连接
+                                pandas.merge(left,right,how = 'inner',on = None,left_on,right_on,...)
+                                join 方法   两个主键的名字必须相同
+                                pandas.DataFrame.join(self,other,on = None, how = 'left',...)
+   
+     重叠合并数据
+            1.combine_first 方法   两份数据几乎一致，其中一份有所缺失
+               pandas.DataFrame.combine_first(other)
+
+    数据清洗
+    检测与处理重复值
+            1.记录重复
+              方法一   利用列表去重，自定义去重函数
+              方法二   利用集合的元素是唯一的特性去重，如dish_set = set(dishes)  会使数据排列发生改变
+              pandas.DataFrame(Series).drop_duplicates(self,subset = None,keep = 'first',inplace = 'false')   不会改变排列   支持单一或多个特征去重
+             2.特征重复 corr 默认为‘pearson’法 （只能对数值型进行相似度计算）
+             3.利用isnull或notnull找到缺失值    返回布尔值
+                结合sum函数和isnull、notnull函数，可以检测数据中缺失值的分布以及数据中一共含有多少缺失值
+
+             1.删除法        分为删除观测记录和删除特征两种
+               pandas.DataFrame.dropna(self,axis = 0 , how = 'any',thresh = None, sunset = None , inplace = False)
+               axis  = 0 时删除行记录 为 1 时 删除列记录
+             2.替代法       用一个特定的值替换缺失值
+               数值型       均值、中位数 、众数 等替代
+               类别型        众数
+               pandas.DataFrame.fillna(value = None,method = None,axis = None,inplace = False ,limit = None)
+            3.插值法  SciPy库中的interpolate
+               线性插值     求解线性方程得到缺失值 
+                             from scipy.interpolate import interp1d
+                             model = interp1d(x,y,kind = 'linear'_
+                             model([4,5])
+               多项式插值 
+                      拉格朗日插值    
+                                    from scipy.interpolate import lagrage
+                                    f_lag = lagrange(x,y)
+                                    f_lag([4,5])
+                      牛顿插值
+               样条插值      
+                              from scipy.interpolate import spline,BSpline
+                              y_bs = BSpline(x,y,k=1)
+                              y_bs([4,5])
+
+       异常值（离群点）
+             1.主要为3σ原则和箱线图分析两种
+              3σ原则又称为拉伊达法则     先假设一组检测数据只含有随机误差，对原始数据进行计算处理得到标准差，然后按一定的概率确定一个区间，认为误差超过这个区间的就属于异常值
+               可以认为超过3σ区间的部分为异常值
+              箱线图    QL-1.5QR~QU+1.5QR
+       
+       离差标准化  
+             1.离差标准化是对原始数据的一种线性变换，结果是将原始数据的数值映射到【0，1】之间，转换公式为(X-min)/max-min
+               离差标准化保留了原始数据值之间的联系，是消除量纲和数据取值范围影响最简单的方法
+             2.数据和最小值相等时，会出现很多0 ； 最大值很大是，标准化后差值接近0
+        
+       标准差标准化
+             1.标准差标准化也叫零均值标准化或分数标准化，处理后均值为0，标准差为1 ，公式为 （X-Mean）/δ    δ为原始数据的标准差
+  
+       小数定标标准化数据
+             1.通过移动数据的小数维数，将数据映射到区间【-1,1】之间，移动的小数位数取决于数据绝对值的最大值。公式如下X/10^k
+             2.k取 log(数据中最大值的绝对值）再取整
+       三者方法优势
+             1.离差标准化 方法简答，便于理解，标准化后的数据限定在【0,1】之间
+             2.标准差标准化受到数据分布的影响较小
+             3.小数定标标准化方法的适用范围广，并且受到的数据分布的影响较小，相较于前两种方法而言该方法适用程度适中
+
+       哑变量处理类别数据
+             1.数据中不一定只有数值型，还有一部分的类别性的数据需要经过哑变量处理才可以放入模型之中
+             2.get_dummies函数  
+                pandas.get_dummies(data,prefix = None,prefix_sep = '_',dummy_na = False,columns = None,sparse = False,drop_first = False)
+             3.对于一个类别特征，若其取值有m个，则经过哑变量处理后就变成了m个二元特征，并且这些特征互斥，每次只有一个激活，这使得数据变得稀疏
+             4.主要解决了部分算法模型无法处理类别型数据的问题，这在一定程度上起到了扩充特征的作用。由于数据变成了稀疏矩阵的形式，因此也加速了算法模型的运算速度。
+       
+        离散化连续型数据
+             1.离散化
+              2.某些模型算法，特别是分类算法如ID3决策树算法和Apriori算法等，要求数据是离散的，此时就需要将连续型特征（数值型）变换成离散型特征（类别型）
+             3.将连续特征的离散化就是在数据的取值范围内设定若干个离散的划分点，将取值范围划分为一些离散化的区间，最后用不同符号或整数值代表落在每个自取件中的数据值
+             4.离散化涉及两个子任务，即确定分类数和如何将连续型数据映射到这些类别型数据上
+ 
+         1.等宽法  不均匀 严重损坏模型    pandas.cut(x,bins,right = True , labels = None,retbins = False,precision = 3,include,..)
+          2.等频法  均匀 区间宽度不一  
+          3.cut 虽不能等频划分区间，但可以根据定义将相同数量的记录放进每个区间
+           例， def  samfreq(data,k): 
+                          w = data.quantile(np,arange(0,1+1/k,1/k))
+                          return pd.cut(data,w)
+                   samefreq(data['amounts'],k=5).value_counts()
+          4.基于聚类分析的方法
+            K-Means算法由于算法缺陷，需要配合聚类评价算法，以找出最优分类数
+
+     scikit-learn模块
+     加载datasets模块中的数据集
+         1.datasets模块常用数据集加载函数及其解释
+            使用sklearn进行数据预处理会用到sklearn提供的统一接口--转换器（Transformer）
+            加载后的数据集可以视为一个字典，几乎所有的sklearn数据集均可以使用data,target
+            feature_names,DESCR分别获取数据集的数据，标签，特征名称和描述信息
+             load_boston                        回归                               load_breast_cancer       分类，聚类
+             fetch_california_housing      回归                               load_iris                        分类，聚类
+             load_digits                          分类                                load_wine                     分类
+     常用划分方式
+          1.训练集 ：用于估计模型
+             验证集 ：用于确定网络结构或者控制模型复杂程度的参数
+             测试集：用于检验最优的模型的性能
+         2.典型的划分方式是训练集占总样本的50%,而验证集和测试机各占25%
+         3.k折验证法
+            步骤如下：
+                将样本打乱，均匀分为K分
+                轮流选择其中K-1分做训练，剩余的一份做验证
+                计算预测误差平方和，把 K次的预测误差平方和的均值作为选择最优模型结构的依据
+          4.train_test_split函数
+              sklearn.model_selection.train_test_split(*array,**options,test_size,train_size,random_state)
+          
+     使用sklearn转换器进行数据预处理与降维
+          sklearn把相关的功能封装为转换器。使用sklearn转换器能够实现对传入的NumPy数组进行标准化处理，归一化处理，二值化处理，
+          PAC降维等操作
+         1.sklearn转换器的三个方法
+            fit         主要通过分析特征和目标值，提取有价值的的信息，这些信息可以是统计量，也可以是权值系数等
+            transform       主要用来对特征进行转换。
+                从可利用信息的角度可分为无信息转换和有信息转换。无信息转换是指不利用任何其他信息进行转换，比如指数和对数函数转换。
+                有信息转换根据是由利用目标向量游客纷为无监督转换和有监督转换。无监督转换既利用了特征信息又利用了目标信息的转换，
+                比如通过模型选择特征和LDA降维等。
+            fit_transform  先调用fit方法后调用transform
+         2.数据分析中，各类特征处理相关的操作都需要对训练集和测试机分开操作，需要将训练集的操作规则，权重系数等应用到测试集中
+           如果使用pandas，则应用至测试集的过程相对繁琐，使用sklearn转换器可以解决这一困扰
+     
+      sklearn部分预处理函数与其作用
+         1.MinMaxScaler         对特征进行离差标准化
+            from sklearn.preprocessing import MinMaxScaler 
+            model = MinMaxScaler().fit(train_data)
+            train_data_mms = model.transform(train_data)
+            test_data_mms = model.transform(test_data)
+            model.min_
+         2.StandardScaler        对特征进行表标准差标准化
+         3.Normalizer              对特征进行归一化
+         4.Binarizer                 对定量特征进行二值化处理
+         5.OneHotEncoder      对定性特征进行独编码处理
+         6.FunctionTransfromr   对特征进行自定义函数变换
+
+     PCA降维算法函数
+         1.from sklearn.decomposition import PCA
+            model = PCA(n_component = 8).fit(train_data_mms)
+            train_data_mms =  model.transform(train_data_mms)
+            test_data_mms = model.tarnsform(test_data_mms)
+
+     使用sklearn估计器构建聚类模型
+       聚类 
+         1.聚类方法类别
+              划分（分裂）方法             K-Means算法，K-MEDOIDS算法（K-中心点）、CLARANS算法（基于选择的算法）
+              层次分析方法                   BIRCH算法（平衡迭代规约和聚类）、CURE算法（代表点聚类）、CHAMELEON（动态模型）
+              基于密度的方法                DBSCAN算法（基于高密度连接区域）、DENCLUE算法（密度分布函数）、OPTICS算法（对象排列识别）
+              基于网格的方法                STING算法（统计信息网络）、CLIOUE算法（聚类高维空间）、WAVE-CLUSTER(小波变换)
+         2.cluster提供的聚类算法及其适用范围
+           KMeans                         簇数              样本数目很大，聚类数中等                     点之间距离
+           Spectral clustering         簇数                            中等            较小                     图距离
+           Ward hierarchical clustering 簇数                      较大             较大                    点之间距离
+           Agglomerative clustering    簇数                       较大             较大                    热木偶成调动艾玛线图间的距离
+           DBSCAN           半径大小、最低成员数目             很大             中等                 最近的点之间的距离
+           Birch              分支因子，阈值，可选全局集群      很大            较大                  点之间的欧式距离
+ 
+      sklearn估计器 
+          sklearn估计器与转换器类似，拥有fit和predict两个方法fit、predict
+           from sklearn.datasets import load_iris 
+           from sklearn.cluster import KMeans
+ 
+           data = load_iris
+           model = KMeans(n_cluster  = 3 ).fit(data['data'])
+           model.labels_
+           model.cluster_centers_
+           import matplotlib.pyplot as plt
+             
+           for i in range(2):
+                plt.scatter(data['data'][model.labels_ == i,0],data['data'][model.labels_==i,1])
+           plt.show()
+ 
+       聚类模型评价指标
+          1组内的相似性越大，组间差别越大，聚类效果就越好。sklearn的metrics模块提供的聚类模型评价指标
+             API评价法（兰德系数）       需要真实值      最佳值1.0            函数     adjusted_rand_score
+             AMI评价法（互信息）         需要                          1.0                      adjusted_mutual_info_score
+             V-measure(评分）              需要                          1.0                     completeness_score
+             FMI评价法                         需要                           1.0                     fowlkes_mallows_score
+             轮廓系数评价法                 不需要                 畸变程度最大                silhouette_score
+           Calinski-Harabase指数评价法 不需要                相较最大                    calinski_harabaz_score
+
+         from sklearn.metrics import silhouette_score
+         for k in range(2,9):
+         	model = KMeans(n_clustering = k).fit(data['data'])
+         	model_score = silhouette_score(data['data'],model.labels_)
+ 
+    使用sklearn估计器构建分类模型
+       分类算法的实现过程
+           1.分类算法有很多，其原理千差万别
+             有基于样本距离的最近邻算法、基于特征信息熵的决策树、基于bagging的随机森林、基于boosting的梯度提升分类树
+           2.模块名                                      函数名                              算法名
+                linear_model                   LogisticRegression             logisitic回归
+                svm                                    SVC                                支持向量机
+                 neighbors                KNeighborsClassifier               K最近邻分类
+                naive_bayes               GaussianNB                            高斯朴素贝叶斯
+                tree                        DecisionTreeClasssifier               分类决策树
+               ensemble              RandomForestClassifier               随机森林分类
+              ensemble                 GradientBoostingClassifier         梯度提升分类树
+              
+               from sklearn.datasets import load_breast_cancer
+               data = load_breast_cancer()
+               x = data['data']
+               y = data['target']
+
+              from   sklearn.model_selection import train_test_split
+               x_train,x_test,y_train,y_test = train_test_split(x,y,test_size = 0.2)
+
+              from sklearn.preprecession import StandardScaler
+              model = StandardScaler().fit(x_train)
+              x_train_ss = model.transform(x_train)
+              x_test_ss = model.transform(x_test)
+              
+              from sklearn.svm import SVC
+              model = SVC().fit(x_train_ss,y_train)
+              y_pred = model.predict(x_test_ss)
+              model.score(x_test_sst,y_test)
+       
+        分类模型的评价指标  
+            1.为了有效判断预测模型的性能表现，需要结合真实值，计算出精确率、召回率、F1值和Cohen's Kappa系数等指标衡量
+            2.sklearn.metrics 还提供了一个能够输出分类模型评价报告的函数classification_report 
+               Precision                          最佳值 1.0                  函数 metrics.precision_score
+               Recall                                          1.0                         metrics.recall_score
+               F1值                                            1.0                         metrics.f1_score
+               Cohen's Kappa系数                     1.0                          metrics.cohen_kappa_score
+              ROC曲线                            最靠近y轴                          metrics.roc_curve
+
+            from sklearn.metrics import recall_score,precision_score,f1_score,roc_curve
+            print(recall_score(y_test,y_pre))
+            print(precision_score(y_test,y_pre))
+            print(f1_score(y_test,y_pre))
+
+     ROC曲线
+          1.横纵坐标范围【0,1】，通常情况下ROC曲线与X轴形成的面积越大，表示模型性能越好
+          2.但当ROC曲线处于对角线的位置，就表明了模型的计算结果基本都是随机得来的，此种情况下作用几乎为零
+             from sklearn.metrics import roc_score
+             fpr,tpr,thresholds = roc_curve(y_test,y_pre)
+             import matplotlib.pyplot as plt 
+             plt.plot(fpr,tpr)
+             plot.show()
+
+     skleran库常用回归算法函数
+          1.sklean内部提供了不少回归算法
+             linear_model                              LinearRegression                     线性回归
+              svm                                               SVR                                  支持向量回归
+            neighbors                              KNeighborsRegressor                最近邻回归
+            tree                                       DecisionTreeRegressor             回归决策树
+            ensemble                             RandomForestRegressor                随机森林回归
+            ensemble                             GradientBoostingRegressor             梯度提升回归树
+   
+       回归模型评价指标 
+            1.由于回归模型的预测结果和真实值都是连续的，所以不能求取Precision、Recall、F1值扥评价指标
+            2.      平均绝对误差                      最优值 0          函数          metrics.mean_absolute_error
+                     均方误差                                      0                           metrics.mean_squared_error
+                    中值绝对误差                                1                            metrics.median_absolute_error
+                     可解释方差值                               1                            metrics.explained_variance_score
+                     R方值                                          1                            metrics.r2_score
+            3. form sklearn.datasets import load_boston
+                data = load_boston()
+                x = data['data']
+                y = data['target']
+                
+                from sklearn.model_selection import train_test_split 
+                x_train,x_test,y_train,y_test = train_test_split(x,y,test_size = 0.2)
+                model = LInearRegression().fit(x_train,y_train）
+                y_pre = model.predict(x_test)
+               import matplotlib.pyplot as plt 
+               plt.plot(range(len(y_test)),y_test)
+               plt.plot(range(len(y_pre)),y_pre)
+               plt.legend(['real','predict']
+               plt.show()
+
+               from sklearn.metrics import mean_squard_error, r2_score
+               mean_squared_error(y_true = y_test,y_pred =  y_pre)
+               r2_score(y_true = y_test,y_pred =  y_pre)
+            
+
+
+
+

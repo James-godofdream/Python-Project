@@ -1,0 +1,143 @@
+案例背景
+    水产养殖
+       水产养殖的关键因素之一是水质
+       养殖水体生态系统的平衡状况可通过水质颜色体现
+       传统水质监控的关键：行家
+    依赖人（专家）的局限性
+       对个人经验要求高
+       存在主观性引起的观察性偏差
+       观察结果的可比性、可重复性不高、不易推广应用
+   在线水质监测
+       1.计算机视觉
+       2.数字图像处理技术
+       3.专家经验（专家数据）
+       4.机器学习算法
+    原始数据  1_1.jpg 、1_2.jpg ... 
+    
+分析方法与过程
+    水质评价流程 
+       样本数据采集 -> 数据预处理 -> 构建专家样本 -> 构建模型 -> 模型评价
+    数据读取 ：
+       from PIL import Image
+       path = 'water_images'
+       img = Image.open(path+'1_1.jpg')       #读取图片数据
+       img.show()
+    特征提取 
+       图像特征主要包括：颜色特征、纹理特征、形状特征、空间关系特征等
+       与几何特征相比，颜色特征更为稳健，对于物体的大小和方向均不敏感，表现出较强的鲁棒性
+       本案例由于水色图像是均匀的，故主要关注颜色特征
+    数据转换：
+        图片转像素值矩阵 ： PIL Image.open()
+        r,g,b = im.split() #分成3个颜色通道
+        r_d = np.asarray(r) #取出各通道像素值
+       
+      （续）前面代码
+        import numpy as np
+        r,g,b = img.split()
+        rd = np.asarray(r)
+   图像切割
+        提取水样图像中央101*101 像素的图像
+        设原始图像的大小是MXN ， 则截取宽从第fix(M/2)-50 个像素点到fix(M/2)+50个像素点
+        高从fix(N/2)-50 个像素点到第fix(N/2) + 50 个像素点的子图像
+
+     （续）前面代码
+       M,N = img.size
+       region = img.crop(M/2 -50 ,N/2 -50,M/2+50,N/2 +50)
+       region.show()
+
+   颜色特征
+        颜色直方图 ： 
+             反映的是图像中颜色的组成功分布，即出现了哪些颜色以及各种颜色出现的概率。
+             优点：它能简单描述一幅图像中颜色的全局分布，即不同色彩在整幅图像中所占的比例，特别适用于描述那些难以自动分割的图像和不需                       要考虑物体空间位置的图像
+             缺点  它无法描述图像中颜色的局部分布及每种色彩所处的空间位置，即无法描述图像中的某一具体的对象或物体
+        颜色矩 ： 
+              图像中任何的颜色分布均可以用它的矩来表示。
+              根据概率论，随机变量的概率分布可以由其各阶矩唯一的表示和描述。 
+              一副图像的色彩分布也可认为是一种概率分布，那么图像可以由其各阶矩来描述
+              颜色矩包含各个颜色通道的一阶矩、二阶矩和三阶矩，对于一副RGB颜色空间的图像，具有R、G和B三个颜色通道，则有9个分量
+        颜色直方图产生过特征维数一般大于颜色矩的特征维数，为了避免过多变量影响后续的分类效果，在本案例采用颜色矩提取水样图像的特征
+
+    特征提取：各阶颜色矩
+         一阶颜色矩 ：采用原点矩，反映了图像的整体明暗程度                          E = sum(pix)/N
+         二阶          ： 采用二阶中心矩的平方根，反映了图像颜色的分布范围      σ  = sqrt(sum((pix-E))**2)/N)
+         三阶          ： 采用三阶中心矩的立方根，反映了图像颜色分布的对称性   s = cbrt(sum((pix-E)**3)/N)
+     （续）前面代码
+       r1 = rd.mean()
+       r2 = rd.std()
+       r3 = var(rd)
+       def var(rd):
+             mid = np.mean((rd-rd.mean())**3)
+             return np.sign(mid)*abs(mid)**(1/3) 
+      
+   自定义函数获取所有图片名称
+       import numpy as np 
+       import os 
+       import re
+       path = 'water_images/'
+       def get_img_names(path = path):
+           file_names =  os.listdir(path)
+           img_names = []
+           for i in file_names:
+           if  re.findall('^\d_\d+\.jpg$',i) != []:
+               	    img_names.append(i)
+           return img_names 
+ 
+     将所有图片导入数据，获取颜色矩
+        from PIL import Image
+        import numpy as np 
+        import os,re
+
+        path = 'water_images/'
+
+         def var(rd):
+             mid = np.mean((rd-rd.mean())**3)
+             return np.sign(mid)*abs(mid)**(1/3) 
+
+       def get_img_names(path = path):
+           file_names =  os.listdir(path)
+           img_names = []
+           for i in file_names:
+           if  re.findall('^\d_\d+\.jpg$',i) != []:
+               	    img_names.append(i)
+           return img_names 
+
+   
+   def get_img_daa(path = path):
+          img_names = get_img_names(path = path)
+          n = len(img_names)
+          data = np.zeros([n,9])
+          labels = np.zeros([n])
+        for i in range(n):
+            img = Image.open(path+img_names[i])       #读取图片数据
+            M，N = img.size                                         #像素矩阵的行列数
+            region = img.crop(M/2 - 50,N/2 -50 , M/2 +50 ,N/2 +50)   #截取图像的中心区域
+            r,g,b = region.split()          #分隔像素通道
+            rd = np.asarray(r)             #将图片数据转换为数组
+            gd = np.asarray(g)
+            bd = np.asarray(b) 
+            data[i,0] = rd.mean()      #一阶颜色矩
+             data[i,1] =  gd.mean()    
+           data[i,2] = bd.mean()
+            data[i,3] = rd.std()            #二阶颜色矩
+            data[i,4]  = gd.std()
+            data[i,5] = bd.std()
+            data[i,6] = var(rd)            #三阶颜色矩
+            data[i,7] = var(gd) 
+            data[i,8] = var(bd) 	
+
+             labels[i] = img_names[i][0]
+       return data,labels
+
+     新建脚本 
+        from data_process import get_img_data
+        from sklearn.tree import DecisionTreeClassifier
+        from sklearn.model_selection import train_test_split 
+        from sklearn.metrics import classification_report,confusion_matrix
+ 
+         data, labels = get_img_data()
+         data_tr,data_te,labels_tr,labels_te = train_test_split(data,labels,test_size = 0.2) #将专家样本拆分为训练集和测试集
+         Dtc = DecisionTreeClassifier().fit(data_tr,labels_tr)        #模型训练
+         pre = Dtc。predict(data_te)
+         sum(pre == labels_te)/len(pre)
+         confusion_matrix(labels_te,pre)
+         classification_report(labels_te,pre)

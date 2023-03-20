@@ -1,0 +1,123 @@
+背景和目标
+     垃圾短信
+        2018年，全国约84.0亿条（360互联网安全中心）
+        以银行诈骗、互联网虚假网购、电信诈骗等内容为主
+     我国目前的垃圾短信现状：
+        垃圾短信黑色利益链
+           由于监管缺失，一些不良组织通过各式各样的渠道收集个人手机信息并将手机信息卖给有需求的商家和业务人员获取利益
+           同时商家等通过发送广告推销、诈骗等垃圾短信，来谋取利益，严重危害了短信用户的信息安全和正常生活
+           主要的黑色利益链存在形式： 
+                  伪基站
+                  不法商家
+        缺乏法律保护
+        短信类型日益多变
+           1.投放方式不断改进
+           2.垃圾短信内容多变
+           3.垃圾短信类型多样
+        案例目标：垃圾短信识别
+           基于短信文本内容，建立识别模型，准确地识别出垃圾短信，以解决垃圾短信过滤问题
+
+总体流程：
+       抽取数据 -> 数据清洗 -> 分词 -> 建模准备数据准备 -> 建模 -> 评价与优化 -> 部署 
+      import pandas as pd 
+      data = pd.read_csv('message80W1.csv',header = None,index_col = 0)
+      data.cloumns = ['label','message']
+      
+数据探索   
+      欠抽样
+        过抽样：通过增加少数类样本来提高少数类的分类性能
+        欠抽样：通过减少多数类样本来提高少数类的分类性能
+        此案例对数据进行欠抽样处理：各取一万垃圾短信及非垃圾短信 1万数据
+      n = 1000
+      a = data[data['label'] == 0].sample(n)
+      b = data[data['label'] == 1].sanple(n)
+      data_new = pd.concat([a,b],axis = 0)
+数据抽取 
+     数据预处理
+         数据清洗
+                 去除空格 ： 全角或半角下的空格
+                  x 序列
+      import re
+      data_dup = data_new['message'].drop_duplicates()       #去重
+      data_qumin = data_dup.apply(lambda x: re.sub('x','',x))  #去除脱敏部分内容
+          分词
+                  正向最大匹配法
+                  NLP概率图：HMM针对中文分词应用-Viterbi算法
+                  利用Viterbi 算法找出一条概率最大路径
+      import jieba 
+      jieba.load_userdict('newdic1.txt')
+      data_cut = data_qumin.apply(lambda x :jieba.lcut(x))
+          添词典去停用词
+      stopWords = pd.read_csv('stopword.txt',encoding = 'GBI8030',sep = 'hahaha',header = None)
+      stopWords = ['会','月','日','-' ] +list(stopWords.iloc[:,0])
+      data_after_stop = data_cut.apply(lambda x : [i for i in x if i not in stopWords])
+      data_after_stop.index
+      labels =  data_new.loc[data_after_stop.index,'label']
+      adata = data_after_stop.apply(lambda x : ' '.join(x))
+
+函数封装
+  def data_process(file = 'message80W1.csv',):
+      data = pd.read_csv(file,header = None,index_col = 0)
+      data.cloumns = ['label','message']
+      n = 1000
+      a = data[data['label'] == 0].sample(n)
+      b = data[data['label'] == 1].sanple(n)
+      data_new = pd.concat([a,b],axis = 0)
+      data_dup = data_new['message'].drop_duplicates()       #去重
+      data_qumin = data_dup.apply(lambda x: re.sub('x','',x))  #去除脱敏部分内容
+      jieba.load_userdict('newdic1.txt')
+      data_cut = data_qumin.apply(lambda x :jieba.lcut(x))
+      stopWords = pd.read_csv('stopword.txt',encoding = 'GBI8030',sep = 'hahaha',header = None)
+      stopWords = ['会','月','日','-' ] +list(stopWords.iloc[:,0])
+      data_after_stop = data_cut.apply(lambda x : [i for i in x if i not in stopWords])
+      data_after_stop.index
+      labels =  data_new.loc[data_after_stop.index,'label']
+      adata = data_after_stop.apply(lambda x : ' '.join(x))
+
+      return adata, data_after_stop,labels 
+
+绘制词云
+     词频统计
+      from data_process import data_process
+      from wordcloud import WordCloud
+      import matplotlib.pyplot as plt
+      word_fre = {}
+      adata, data_after_stop,labels = data.process()
+      data_after_stop[labels == 1]
+      for i in data_after_stop[labels == 1]            #labels == 0 则是正常短信
+           for j in i:
+                if j not in word_fre.keys():
+                      word_fre[j] = 1
+               else: 
+                      word_fre[j] += 1
+     词云绘制
+      mask = plt.imread('duihuakuan.jpg')
+      wc = WordCloud(mask = mask,background_color = 'white',font_path =r 'C:\Windows\Fonts\simhei.tif')
+      wc.fit_words(word_fre)
+      plt.imshow(wc)
+
+文本的向量表示:
+    One-Hot 表达             【0 1 0 0 1 0 0 1 1 0 1 1 0】缺陷：忽略了句子词频信息
+    TF-IDF权重策略 
+           增加词频信息
+           归一化：避免句子长度不一致问题，即文档TF信息
+    TF-IDF权重策略
+           TF : Term Frequency 
+           IDF: Inverse document frequency 
+    from data_precess import data_process
+    from sklearn.model_selection import train_test_split
+    from sklearn.feature_extraction.text import CountVectorizer,TfidfTransformer
+    adata,data_after_stop,labels = data.process()
+    data_tr,data_te,labels_tr,labels_te = train_test_split(adata,labels,test_size = 0.2)
+
+     countVectorizer = CountVectorizer()
+    data_tr = countVectorizer().fit_transform(data_tr)
+    X_tr = TfidfTransformer().fit_transform(data_tr.toarray()).toarray()
+
+    data_te = CountVectorizer(vocabulary = countVectorizer.vocabulary_).fit_transform(data_te)
+模型构建
+    from sklearn.naive_bayes import  GaussianNB
+    X_te = TfidfTransformer().fit_transform(data_te.toarray()).toarray()
+    model = GaussianNB
+    model.fit(X_tr,labels_tr)
+    model.score(X_te,labels_te)

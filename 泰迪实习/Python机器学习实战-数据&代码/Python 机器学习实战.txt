@@ -1,0 +1,541 @@
+机器学习
+     基本术语
+          1.假设：学得模型对应的关于数据的某种潜在规律
+          2.监督学习：训练样本有标记
+          3.分类：输出结果为离散值
+          4.回归：输出结果为连续值
+          5.泛化能力：学得模型适用新样本的能力
+          6.独立同分布：样本空间的全体样本都服从一个未知的分布，且相互独立
+      
+     假设空间
+          1.归纳与演绎
+             归纳:特殊->一般 “泛化”：从样例（训练样本）中学习
+             演绎:一般->特殊   “特化”：
+          2.假设空间 ： 每个特征的所有取值数+1（不取）再相乘+1（无概念）
+          3.版本空间：与训练集一致的假设的集合称为“版本空间”
+
+    归纳偏好 
+          1.归纳偏好原则一：奥卡姆剃刀（简单优先）
+          
+     
+     模型评估
+     经验误差与过拟合
+           1.真实值与预测值
+              误差 ： 模型输出与样本真实值之间的差异
+                  错误率：分类错误样本数占总样本数比例
+                  精度 ： 1-错误率
+                  训练误差：模型在训练集上的误差
+                  泛化误差：模型在新样本上的误差
+
+                  目标：得到泛化误差小的模型/学习器
+                  实际：新样本未知
+                  以经验误差代替泛化误差
+                  模型从训练样本中学得适用于所有潜在样本的“普遍规律”
+           2.过拟合 与 欠拟合
+               过拟合 ：用力过猛 （误以为树叶必须有锯齿） 
+               欠拟合 ：用力不足（误以为绿色的都是树叶）
+           
+      评估方法
+           1.训练集与测试集  （独立同分布&互斥）用测试误差近似表示泛化误差
+                   目标：对于模型/学习器的泛化
+                   误差进行评估
+                   专家样本 ： 训练集+测试集
+                   训练集：训练误差
+                   测试集：测试误差
+            2.测试误差与泛化误差
+                  留出法          
+                          训练集+测试集 ：互斥互补
+                          训练集训练模型， 测试集测试模型
+                          合理划分、保持比例
+                          单次留出与多次留出
+                  交叉验证     
+                          K折交叉验证：将专家样本等划分为K个数据集，轮流用K-1个用于训练，1个用于测试
+                          from sklearn.model_selection import cross_val_score
+                          from sklearn.datasets import load_iris
+                          from sklearn.svm import SVC
+                          iris = load.iris()
+                          clf = SVC(kernel = 'linear' , C = 1)
+                          scores = cross_val_score(clf,iris.data,iris.target,cv = 5)
+                          p次K折交叉验证
+                  自助法
+                          给定m个样本的数据集D，从D 中又放回随机取m次数据，形成训练集D’
+                          用D 中不包含D’的样本作为测试集
+                          D 中某个样本不被抽到的概率为：（1-1/m）^m
+                          测试集数据量：lim（1-1/m）^m -> 1/e ~=    0.368(m->infinte)
+                          缺点：改变了初始数据集的分布
+ 
+       性能度量
+            1.评价方法与评价标准
+               回归任务的评价标准：均方误差
+            2.错误率与精度
+               错误率：分类错误样本数占总样本数比例
+               精度：1-错误率
+            3.犯错的代价     印尼海啸  与 “弗洛伊德”飓风
+     
+         查准率与查全率
+            1.混淆矩阵 列为预测是  行为实际值 
+            2.查准率/准确率 (precision)       ： P = TP/(TP+FP)
+            3.查全率/召回率/灵敏度（recall) ： R = TP/(TP+FN)
+            4.F1系数 
+                  综合查准率与查全率             F1 = 2PR/(P+R)=2TP/(样例总数+TP-TN)
+                  更一般的形式                       Fβ = （（1+β^2）PR）/((β^2 P)+R)
+                  其中β为正数，越大表明越偏重查全率（>1）
+          多次训练/测试时的F1系数
+             1.先总后分（macro）：先分别计算各混淆矩阵的查准率和查全率，再以均值汇总 
+             2.先总后分（micro）：先将个混淆矩阵的对应元素（TP、FP、TN、FN）进行汇总平均，再求P
+               from skleran.metrics import precision_score
+               from skleran.metrics import confusion_matrix
+               from skleran.metrics import classification_report
+               true = []
+               pred = []
+               result = precision_score(true,pred,average = None)
+               result = confusion_matrix(true,pred,average = None)
+               result = classification_report(true,pred,average = None)
+               print(result)
+     
+       回归分析
+       线性模型
+           1.线性模型试图学得一个通过属性的线性组合来进行预测（目标属性）的函数
+              形式简单，
+              蕴含机器学习的基本思想
+              是其他非线性模型的基础
+              权重体现出各属性重要性，可解释性强
+            2.目标函数（单变量）
+               均方误差最小化（最小二乘法）  找到一条直线，使所有样本到直线上的欧式距离之和最小
+            3.线性回归
+              sklearn.linear_model 中的 LinearRegression
+              LinearRegression(fit_intercept = True,计算随机变量 ，normalize = Fasle, 表示在回归前是否对回归因子X 进行归一化，copy_X = True)      其常用方法有：
+                    decision_function(X) #返回X的预测值y
+                    fit(X,y[,n_jobs])         #拟合模型
+                    get_params([dee])     #获取LinearRegression 构造方法的参数信息
+                    predict(X)                 #求预测值
+              例.from sklearn.linear_model import LinearRegression 
+                  clf  = LinearRegression()
+                  clf.fit([[0,0],[1,1],[2,2]],[0,1,2]) #模型训练
+                  pre = clf.predict([[3.3]])        #自变量为二维数据
+                  clf.coef_                 #参数      0.5x1+0.5x2
+                  clf.intercept_          #截距      l.23443
+                  print(pre)
+
+      波士顿放假数据回归分析
+           1.数据说明
+           from sklearn.datasets import load_boston
+           from sklearn.linear_model import LinearRegression
+           import matplotlib.pyplot as plt 
+    
+           bosten = load_boston()       #实例化
+           x = bosten.data[:,5:6]
+           clf = LinearRegression()
+           clf.fit(x,bosten..target)
+           print(clf.coef_)
+           print(clf.intercept_)
+           y_pre = clf.predict(x)   #模型输出值
+
+           plt.scatter(x,bosten.target)  #样本实际值
+           plt.plot(x,y_pre)    
+
+   逻辑回归 
+          1.分类和回归二者不存在不可逾越的鸿沟
+          2.逻辑回归是对数几率回归，属于广义线性模型（GLM），它的因变量一般只有0或1
+          3.线性回归并没有对数据的分布进行任何假设，而逻辑回归隐含了一个基本假设：每个样本均独立服从与伯努利分布（0-1分布）
+          4.伯努利分布属于指数分布	，这个大家庭还包括：高斯（正态）分布、多现实分布、泊松分布、伽马分布、Dirichlet分布等
+     
+          1.对数线性回归  ： ln y = w^Tx+b
+          2.将线性回归模型的预测值和实际值关联起来
+          3.阶跃函数的代替函数 ： Sigmoid 函数 y = 1/（1+e^(-z)） 代入线性模型得y = 1/（1+e^(-( w^Tx+b))）  ln(y/(1-y)) =  w^Tx+b
+          4.y/(1-y) 称为几率，表示样本取正例的可能性比例，ln(y/(1-y))称为对数几率
+
+          1.目标： 寻找合适的 w,b 使得 y  逼近 y = 1/（1+e^(-( w^Tx+b))）
+          2.将y视为类别取值为1或0的概率
+          3.求解方法：梯度下降法、牛顿法
+          4.逻辑回归可以解决多分类问题，拆解为多个二分类，如，0，1,2   0 和 非0 
+  
+          import  pandas as pd 
+          from sklearn.linear_model import LogisticRegression 
+          from sklearn.model_selection import train_test_split
+          from sklearn.metrics import classification_report
+          data = pd.read_csv(' ' )
+          data_tr,data_te,label_tr,label_te = train_test_split(data.iloc[:,1:],data['admit'],test_size = 0.2)
+          clf = LogisticRegression()
+          clf.fit(data_tr,label_tr)
+          pre = clf.predict(data_te)
+          res = classification_report(label_te,pre)
+          print(res)
+          
+
+  决策树 
+   基本术语 ‘
+         1.根部节点
+         2.中间节点（代表测试的条件）
+         3.分支（代表测试的结果）
+         4.叶节点（代表分类后所获得的分类标记）
+    
+   决策树属性选择
+       纯度的概念
+           1.纯度度量
+ 	当样本中没有两项属于同一类 ： 0
+                当样本中所有项都属于同一类 ：1
+           2.用于评价拆分分类目标变量的纯度度量包括
+                基尼（Gini,总体发散性）CART
+                熵（entropy,信息量）
+                信息增益（Gain）ID3
+                信息增益率 C4.5 , C5.0 , 
+          3.改变拆分准则导致树的外观互不相同
+       属性选择的先后顺序
+          1.熵值
+          2. 信息增益
+          3.信息增益率
+      
+       熵
+          1.信息论中的熵：是信息的度量单位，是一种 对属性“不确定的度量”
+             属性的不确定性越大，把它搞清楚所需要的信息量也就越大，熵也就越大
+          2.如果一个是数据集D有N个类别，则该数据集的熵为：Ent(D)  = -sum(pi log2( pi)) i from 1 to N   pi 为 第i类样本的概率值
+
+      信息增益（gain）: 对纯度提升的程度
+         1.若离散属性a 有 V 个取值， 则其信息增益为： 
+            Gain(D,a) = Ent(D) - sum(|D^v|*Ent(D^v)/|D| ) v from 1 to V 
+                               总熵          子熵     
+         
+    ID3算法实现
+         1.步骤如下： 
+              对当前样本集合，计算所有属性的信息增益
+              选择信息增益最大的属性作为拆分属性，把拆分属性取值相同的样本划为同一个子样本集
+              若子样本集的类别属性只含有单个属性，则分支为叶子节点，
+              判断其属性值并标上相应的符号之后返回调用处；否则对子样本集递归调用本算法
+         2.经典算法之一，包含了决策树作为机器学习算法的主要思想，缺点是：
+            由于ID3决策树算法采用信息增益作为选择拆分属性的标准   ，会偏向于选择取值较多的，即所谓高度分支属性，而这类不一定是最优的
+            ID3算法只能处理离散属性，对于连续型的属性，在分类前需要对其进行离散化
+         3.常见决策树算法如下：
+            ID3算法
+            C4.5      使用信息增益率来选择节点属性
+            C5.0      使用于处理大数据集，提高模型准确率，占用内存资源较少
+            CART     基尼系数  通过构建数、修建树、评估树来构建一个二叉树。
+                         当终结点是连续变量时，该树为回归树；当终结点是分类变量，该树为分类树
+
+      实例：泰坦尼克生还预测
+           import pandas as pd 
+           from sklearn.tree import DecisionTreeClassifier,export_graphviz
+           from sklearn.metrics import Classification_report
+           import Graphviz
+
+           data = pd.read_csv(' ')
+           data.drop('PassengerId',asix = 1,inplace = True)
+           
+           data.loc[data['Sex'] == 'male','Sex'] =1
+           data.loc[data['Sex'] == 'female','Sex'] = 0 
+           
+           data.fillna(data['Age'].mean(),inplace = True)
+           Dtc =  DecisionTreeClassifier(max_depth = 5, random_state = 8)
+           Dtr.fit(data.iloc[:,1:],data['Survired'] )
+    
+           pre = Dtr.predict(data.iloc[:,1:])
+           pre == data['Survived']
+           classification_report(data['Survived'],pre)
+
+           dot_data = export_grahviz(Dtc,feature_names = [‘Pclass’,'Sex','Age'],class_names = 'Survived')
+           graph = graphviz.Source(dot_data)
+           graph
+
+神经网络
+  BP神经网络
+      1.网络训练目标：找出合适的权值和阈值，使得误差E最小
+      2.BP算法是以网络误差平方为目标函数，采用梯度下降法来计算目标函数的最小值
+  网络训练过程：
+      1.输入：训练集数据、学习速率yita
+      2.过程：
+          在（0,1）范围内随机初始化网络中所有连接权和阈值
+          repeat:
+               根据网络输入和当前参数计算网络输出值y
+               计算输出层神经元梯度项gj
+               计算隐层神经元梯度项eh
+               更新连接权值和阈值
+          until达到停止条件
+          输出：连接权值和阈值
+  BP神经网络实现
+        1.import pandas as pd 
+           import numpy as np 
+           import matplotlib.pyplot as plt
+         
+           def sigmoid(x):
+                 return 1/(1+np.exp(-x))
+           yita = 0.85       #学习速率
+ 
+           data_tr = pd.read_csv('BPdata_tr.txt')
+           data_te = pd.read_csv('BPdata_te.txt')
+           n = len(data_tr)
+           net_in =  np.array([  ,   ,  -1])   #网络输入
+           out_in = np.array([0,0,0,0,-1])   #输出层的输入
+           real = 0.114495895339242            
+
+           w_mid = np.zeros([3,4]) #隐层神经元的权值&阈值
+           w_out = np.zeros([5])    #输出层神经元的权值&阈值
+           
+          delta_w_out = np.zeros([5])       #输出层权值&阈值的修正量
+          delta_w_mid =  np.zeros([3,4])   #隐藏神经元的权值&阈值的修正量
+   Err = []
+   for j in range(1000):
+       error = []
+       for it in range(n):
+           net_in = np.array([data_tr.iloc[it,0],data_tr.iloc[it,1],-1])      #网络输入
+           real = data_tr.iloc[it,2]
+           for i in range(4):
+           	out_in[i] = sigmoid(sum(net_in*w_mid[：，i]）) #从输入到隐层的传输过程
+
+            res = sigmoid(sum(out_in*w_out))#模型预测值
+            error.append(abs(real-res))
+            #print(it , '个样本的模型输出:'，res,'real:',real)
+
+            delta_w_out = yita*res*(1-res)*(real-res)*out_in      #输出层权值的更新量
+            delta_w_out[4] =-yita*res*(1-res)*(real-res)             #输出层阈值的修正量
+           
+            for i in range(4):
+            	delta_w_mid[:,i] = yita*out_in[i]*(1-out_in[i])*w_out[i]*res*(1-res)*(real-res)*net_in #中间层神经元的权值修正量
+            	delta_w_mid[2,i] = - yita*out_in[i]*(1-out_in[i])*w_out[i]*res*(1-res)*(real-res) #中间层神经元的阈值修正量
+            w_out = w_out +delta_w_out   #更新
+            w_mid  - w.mid +delta_w_mid  #更新
+        Err.append(np.mean(error))
+            
+     plt.plot(Err)
+     plt.show()
+     plt.close()
+
+      #测试集样本放入网络中
+      error_te = []
+      for it in range(len(data_te)):
+           net_in = np.array([data_te.iloc[it,0],data_te.iloc[it,1],-1])      #网络输入
+           real = data_te.iloc[it,2]
+           for i in range(4):
+           	out_in[i] = sigmoid(sum(net_in*w_mid[：，i]）) #从输入到隐层的传输过程
+
+            res = sigmoid(sum(out_in*w_out))#模型预测值
+            error_te.append(abs(real-res))
+       plt.plot(error_te)
+       plt.show()
+       np.mean(error_te)
+ 
+    调用sklearn库来实现神经网络
+       from sklearn.neural_network import MLPRegressor #调用回归器 因为数据连续
+       data_tr = pd.read_csv('BPdata_tr.txt')
+       data_te = pd.read_csv('BPdata_tr.txt')
+      
+       model = MLPRegressor(hidden_layer_sizes = (10,),random_state =10，max_iter = 800,learning_rate_init = 0.3) #隐藏层大小，随机数
+       model.fit(data_tr.iloc[:,:2],data_tr.iloc[:,2])    #模型训练
+       pre = model.pre(data_te.iloc[:,:2])    #模型预测
+       err = np.abs(pre-data_te.iloc[:,2]).mean()        #模型预测误差
+     
+ 
+   KNN算法学习
+        1.kNN(k-Nearest Neighbor Classification)，即k-近邻分类算法
+           一个样本在特征空间中，总会有k个最相似（即特征空间中最邻近的）样本
+           其中，大多数属于某一个类别，则该样本也属于该类
+        2.计算步骤：
+           算距离：给定测试对象，计算它与训练集中的每个对象的距离
+                       计算的距离衡量包括欧式距离、夹角余弦等
+           找邻居：圈定距离最近的k个训练对象，作为测试对象的近邻
+           做分类：根据这k个近邻归属的主要类别，来测试对象分类
+                       投票决定：少数服从多数
+                       加权投票法：根据距离的远近，距离越近则权重越大（权重为距离平方的倒数）
+        3.懒惰算法 ：模型简单，计算资源大
+        4.算法流程
+                       计算意志力诶别数据集中的点与当前点之间的距离
+                       按照距离递增次序排序
+                       选取与当前点距离最小的k个点
+                       确定前k个点所在类别对应的出现频率
+                       返回前k个点出现频率最高的类别作为当前点的预测分类
+        5.优点
+                       简单，易于理解，易于实现，无需估计参数，无需训练
+                       适合对稀有事件进行分类（例如当流失率很低时，比如低于0.5%，构造流失预测模型）
+                       特别适合于多分类问题（multi-modal,对象具有多个类别标签） 
+        6.缺点
+                       对测试样本分类时的计算量大，内存开销大，评分慢
+                       可解释性较差，无法给出决策树那样的规则
+
+      Python 实现
+            from sklearn.neighbors import KNeighborsClassifier 
+            from sklearn.datasets import load_iris
+            from skleran.model_selection import train_test_split
+
+            iris = load_Iris()
+            data_tr,data_te,label_tr,label_te = train_test_split(iris.data,iris.target,test_size = 0.2)       #拆分专家样本集
+            model = KNeighborsClassifier(n_neighbors = 3) #构建模型
+            model.fit(data_tr,label_tr) #模型训练
+            pre = model.predict(data_te)        #模型预测
+            acc = model.score(data_te,label_te)  #模型在测试集上的精度
+
+    朴素贝叶斯
+        拉普拉斯平滑处理 
+             1.缺陷：受样本个数限制，若某个属性值在训练集中没有与某个同类同时出现过则连乘公式必为0，其他属性取任意值都不能改变这一结论
+             2.修正方法：拉普拉斯平滑处理
+             3.算法处理流程 ：
+                      确定特征属性-> 获取训练样本 -> 对每个类别计算P（yi）-> 对每个特征属性计算所有划分的条件概率 -> 对每个类别计算P(x|yi)P                       （yi)  -> 以P（x|yi）P（yi）最大项作为x所属类别
+             4.import numpy as pd 
+               from skleran.naive_bayes import GaussianNB
+               from sklearn.datasets import load_iris
+               from skleran.model_selection import train_test_split
+
+               iris = load_Iris()
+               data_tr,data_te,label_tr,label_te = train_test_split(iris.data,iris.target,test_size = 0.2)       #拆分专家样本集
+               clf = GaussianNB()
+               clf.fit(data_tr,label_tr)
+               pre = clf.predict(data_te)
+               acc = sum(pre == label_te)/len(pre)      #模型在测试集样本上的预测精度
+            
+      聚类分析 (无监督的学习，样本无明确标签）
+          1.概念
+             聚类是把各不相同的个体分隔为有更多相似性子集合的工作
+             聚类生成的子集合成为簇
+          2.聚类的要求
+             生成的簇内部的任意两个对象之间具有较高的相似度
+             属于不同簇的两个对象间具有较高的相异度
+          3.聚类与分类的区别在于聚类不依赖与预先定义的类，没有预定义的类和样本--聚类是一种无监督的数据挖掘任务
+          4.聚类通常作为其他数据挖掘或建模的前奏
+          5、同一个簇内的距离最小化，不同簇之间的距离最大化
+          6.应用领域
+              客户价值分析
+              文本分类
+              基因识别
+              空间数据处理 
+              卫星图片分析
+          7.常用聚类算法： 
+             K-均值聚类（K-Means）
+             K-中心点聚类（K-Medoids）
+             密度聚类（Densit-based Spatial Clustering of Application with Noise,DBSCAN）
+             层次聚类（系谱聚类 Hierarchical Clustering ,HC）
+             期望最大化聚类法（Expectation Maximization,EM）
+     
+   相似性度量
+      1.如何衡量：距离
+           定量变量，也就是通常所说的连续变量
+           定性变量，这些量并非真有数量上的变化，而只有性质上的差异
+           这些量可以分为两种，一种是有序变量，另一种是名义变量
+      2.相似系数
+           两个仅包含二元属性的对象之间的相似度量也称相似系数
+           两个对象的比较有四种情况：f00 = x 取0并且y取0的属性个数：
+                                                     f01、f10、f11同理
+           简单匹配系数：SMC = 值匹配的属性个数/属性个数
+                                          = （f11+f00)/(f01+f10+f11+f00)
+           Jaccard(杰卡德）系数：J = 匹配的个数/不涉及0-0匹配的属性个数
+                                                = （f11）/(f01 +f10 +f11)
+
+      K-Means 
+          算法步骤
+             1.随机选取K个样本作为类中心
+             2.计算个样本与各类中心的距离
+             3.将各样本归于最近的类中心点
+             4.求各类的样本的均值，作为新的类中心
+             5.判定：若类中心不再发生变动或达到迭代次数，则算法结束，否则返回步骤2
+         算法实现
+             from skelearn.datasets import load_iris
+             import numpy as np
+
+             iris = load_iris()
+             n = len(data)
+             data = iris.data
+             k = 3 
+             center = data[:k,:]              #选中心
+             center_new = np.zeros([k,data.shape[1]])
+             dist = np.zeros([n,k+1])      #求距离
+ 
+             while True:
+             	for i in range(n):
+                    for j in range(k):
+             	        dist[i,j] =  np.sqrt(sum((data[i,:] - center[j,:])**2))     
+             	dist[i,k] = np.argmin(dist[i,:k])                 #归类
+            
+             	for i in range(k):
+             	    index = dist[:,k] == i
+             	    center_new[i,:] = data[index,:].mean(axis = 0)  #按列求均值
+
+             	if np.all(center == center_new)：          #判定全部中心点不再变化
+                    break
+             	center = center_new
+
+        聚类结果性能度量
+            性能度量 ： 簇内相似度与簇间相似度
+                外部指标：将聚类结果与实际结果进行比较
+                       集合SS包含了在聚类结果中属于相同簇且在参考模型中也属于相同簇的样本对
+                       集合SD                                            但在参考模型中不属于相同簇的样本对
+                             DS                            属于不同簇但在参考模型中属于相同簇的样本对
+                             DD                                   不同簇                     不属于相同簇的样本对
+                       设数据集的样本数m,上述四者分别为 a,b,c,d  ，则 四者之和a+b+c+d为 m(m-1)/2
+                     
+                       Jaccard 系数(Jaccard Coefficent,JC)     JC = a/(a+b+c)
+                       FM指数（Fowlkes as Mallows Index,FMI）   FM = sqrt(a^2/((a+b)*(a+c)))
+                       Rand指数（Rand Index,RI）      RI = 2(a+d)/m(m-1) 
+                       值在【0,1】区间，越大越好
+                内部指标：不依赖任何参考模型，直接考察聚类结果
+                       Compactness(紧密性)(CP)：个样本到聚类中心的平均距离          越小越好
+                       Separation(间隔性)(SP)：各类中心间的平均距离                        越大越好
+                       DB指数（Davies-Bouldin Index,DBI）                                     越小越好
+                       Dunn指数（Dunn Index , DI）                                               越大越好
+     
+       K-Means 算法        适合球类簇
+            1.优点
+                    算法简单，易于理解
+                    对球形簇样本聚类效果好
+                    二分k均值等变种算法运行良好，不受初始化问题的影响
+            2.缺点
+                    不能处理非球形簇、不同尺寸和不同密度的簇
+                    对离群点、噪声敏感
+
+       from sklearn.datasets import load_iris
+       from sklearn.cluster import KMeans
+       iris = load_iris()
+       model = KMeans(n_clusters = 3).fit(iris.data)
+       model.labels_
+          
+    支持向量机
+      间隔与支持向量
+         最优超平面（直线）：对训练样本局部扰动的“容忍性”最好，即最具鲁棒性
+         目标：确定w,b使得γ最大, yi(wx+b)>=1
+         模型 ： min  γ = 1/2 ||w||
+                    s.t.    yi(wx+b) >= 1
+
+      凸二次优化问题
+          凸函数：开口朝一个方向（向上或向下）
+          拉格朗日法一定适合凸函数
+
+      拉格朗日乘子法：将约束条件与原函数联立，从而求出使原函数取得极值的各个变量的解
+      将支持向量模型转化为图二次优化问题
+      通过拉格朗日乘子法 写出拉格朗日函数
+      对w,b的偏导使之为0  即可求得w,b（含α）
+
+      KKT条件
+        αi>=0	 
+        yi（wx+b）-1 >= 0
+        αi(1-yi（wx+b）) = 0 
+          
+      SMO算法 求解出对偶问题中的唯一变量 α
+      对偶问题本身为组合优化问题，且随着训练样本数增大，计算开销也会激增，所以需用更高效的算法
+   
+      1.选取一对需要更新的变量αi,αj
+      2.固定αi,α以外的参数，求解对偶目标函数W（α），即可获得更新的αi,α
+             
+    核函数 
+       线性不可分（非凸数据集）问题
+       无法用一个超平面（线）对不同样本进行划分
+       方法：将样本映射到高维空间
+
+       数学定理：如果原始样本空间是有限维，即属性数有限，那么一定存在一个高维特征空间使样本线性可分
+       用φ（x）表示x 在高维空间的映射函数
+       为了解决高维度计算困难，构造函数： k(xi,xj) = φ（xi）^Tφ（xj）, k(xi,xj)又称核函数
+       核函数难以拟合，故列出几个常见的以供选择
+
+     软间隔与正则化
+         很难找到一个合适的核函数，将原始样本映射到高维空间后完全线性可分
+         软件隔支持向量机
+         在原支持向量机中加入松弛变量
+
+    支持向量机的Python 算法实现
+       from sklearn.datasets import load_iris
+       from sklearn.model_selection import train_test_split
+       from sklearn.svm import LinearSVC
+       iris = load_iris()
+       data_tr,data_te,label_tr,label_te = train_test_split(iris.data,iris.target,test_size = 0.2)
+       model = LinearSVC().fit(data_tr,label_tr)
+       pre = model.predict(data_te)
+       acc = sum(pre == label_te)/len(pre)
+        
+      
+           
+          
